@@ -21,6 +21,8 @@ $dropdown-link-active-bg: $elabblue;
 /* make the non active link in navbar have slightly more contrast */
 $navbar-dark-color: $secondlevel;
 $text-muted: $medium;
+/* override bootstrap default font */
+$font-family-base: 'PretendardGOV', 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 @import 'bootstrap/scss/bootstrap';
 @import 'prismjs/themes/prism';
 @import '@deltablot/dropzone/src/dropzone';
@@ -98,8 +100,82 @@ $text-muted: $medium;
   src: url('fonts/lato-black-italic.woff2') format('woff2');
 }
 
+/* PretendardGOV font family */
+@font-face {
+  font-display: swap;
+  font-family: 'PretendardGOV';
+  font-style: normal;
+  font-weight: 100;
+  src: url('fonts/PretendardGOV-Thin.woff2') format('woff2');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'PretendardGOV';
+  font-style: normal;
+  font-weight: 200;
+  src: url('fonts/PretendardGOV-ExtraLight.woff2') format('woff2');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'PretendardGOV';
+  font-style: normal;
+  font-weight: 300;
+  src: url('fonts/PretendardGOV-Light.woff2') format('woff2');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'PretendardGOV';
+  font-style: normal;
+  font-weight: 400;
+  src: url('fonts/PretendardGOV-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'PretendardGOV';
+  font-style: normal;
+  font-weight: 500;
+  src: url('fonts/PretendardGOV-Medium.woff2') format('woff2');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'PretendardGOV';
+  font-style: normal;
+  font-weight: 600;
+  src: url('fonts/PretendardGOV-SemiBold.woff2') format('woff2');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'PretendardGOV';
+  font-style: normal;
+  font-weight: 700;
+  src: url('fonts/PretendardGOV-Bold.woff2') format('woff2');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'PretendardGOV';
+  font-style: normal;
+  font-weight: 800;
+  src: url('fonts/PretendardGOV-ExtraBold.woff2') format('woff2');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'PretendardGOV';
+  font-style: normal;
+  font-weight: 900;
+  src: url('fonts/PretendardGOV-Black.woff2') format('woff2');
+}
+
 body {
   background: $mainbackground;
+  font-family: 'PretendardGOV', 'Lato', Verdana, Arial, Helvetica, sans-serif;
 }
 
 /* little shadow on top of the screen for no reasons */
@@ -128,7 +204,7 @@ body::before {
 
 /* this is the big white thing that holds everything */
 #container {
-  font: 100% 'Lato', Verdana, Arial, Helvetica, sans-serif;
+  font: 100% 'PretendardGOV', 'Lato', Verdana, Arial, Helvetica, sans-serif;
   font-weight: 500;
   padding: 0;
 }
@@ -1135,7 +1211,7 @@ the form-control fails to do that so we do the border ourselves */
   background-color: $firstlevel;
   border-radius: 5px;
   color: $mediumstrong;
-  font: bold 80% Verdana, Arial, Helvetica, sans-serif;
+  font: bold 80% 'PretendardGOV', 'Lato', Verdana, Arial, Helvetica, sans-serif;
   padding: 2px 5px;
 
   &:hover {
@@ -1841,7 +1917,7 @@ input:user-invalid {
 
 // 코드 관련 스타일 추가
 code {
-  font-family: Menlol;
+  font-family: Menlo;
 }
 
 pre[class*=language-] {
