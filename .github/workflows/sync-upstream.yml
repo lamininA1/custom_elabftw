@@ -1,0 +1,54 @@
+name: Sync Upstream
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # 매일 자정에 실행 (UTC)
+  workflow_dispatch:   # 수동 실행 버튼 활성화
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # push를 위해 필요
+    steps:
+      - name: Checkout target repo
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+
+      - name: Add upstream remote
+        run: |
+          # 이미 upstream이 있으면 제거 후 추가
+          git remote remove upstream 2>/dev/null || true
+          git remote add upstream https://github.com/elabftw/elabftw.git
+
+      - name: Fetch upstream changes
+        run: git fetch upstream
+
+      - name: Checkout master branch
+        run: |
+          git checkout master || git checkout -b master
+
+      - name: Merge upstream changes
+        id: merge
+        run: |
+          if git merge upstream/master --no-edit; then
+            echo "merge_success=true" >> $GITHUB_OUTPUT
+          else
+            echo "merge_success=false" >> $GITHUB_OUTPUT
+            echo "⚠️ Merge conflict occurred! Manual intervention required."
+            git merge --abort || true
+            exit 1
+          fi
+
+      - name: Push changes
+        if: steps.merge.outputs.merge_success == 'true'
+        run: |
+          git push origin master
