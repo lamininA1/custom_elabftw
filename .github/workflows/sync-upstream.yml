@@ -1,8 +1,6 @@
 name: Sync Upstream
 
 on:
-  schedule:
-    - cron: '0 0 * * *' # 매일 자정에 실행 (UTC)
   workflow_dispatch:   # 수동 실행 버튼 활성화
 
 jobs:
