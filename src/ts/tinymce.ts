@@ -37,6 +37,7 @@ import 'tinymce/plugins/save';
 import 'tinymce/plugins/searchreplace';
 import 'tinymce/plugins/table';
 import 'tinymce/plugins/template';
+import 'tinymce/plugins/textpattern';
 import 'tinymce/plugins/visualblocks';
 import 'tinymce/plugins/visualchars';
 import '../js/tinymce-langs/ca_ES.js';
@@ -196,7 +197,7 @@ const imagesUploadHandler = (blobInfo: TinyMCEBlobInfo) => new Promise((resolve,
 
 // options for tinymce to pass to tinymce.init()
 export function getTinymceBaseConfig(page: string): object {
-  let plugins = 'accordion advlist anchor autolink autoresize table searchreplace code fullscreen insertdatetime charmap lists save image media link pagebreak codesample template mention visualblocks visualchars emoticons preview';
+  let plugins = 'accordion advlist anchor autolink autoresize table searchreplace code fullscreen insertdatetime charmap lists save image media link pagebreak codesample template textpattern mention visualblocks visualchars emoticons preview';
   let toolbar1 = 'custom-save preview | undo redo | styles fontsize bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | superscript subscript | bullist numlist outdent indent | forecolor backcolor | charmap emoticons adddate | codesample | link | sort-table';
   let removedMenuItems = 'newdocument, image, anchor';
   let fileMenuItems = 'preview | print';
@@ -232,8 +233,21 @@ export function getTinymceBaseConfig(page: string): object {
     toolbar1: toolbar1,
     // this addresses CVE-2024-29881, it defaults to true in 7.0, so can be removed in tiny 7.0 TODO
     convert_unsafe_embeds: true,
-    // disable automatic h1 when using #
-    text_patterns: false,
+    // markdown-like text patterns for quick formatting
+    text_patterns: [
+      { start: '*', end: '*', format: 'italic' },
+      { start: '**', end: '**', format: 'bold' },
+      { start: '`', end: '`', format: 'code' },
+      { start: '- ', cmd: 'InsertUnorderedList' },
+      { start: '1. ', cmd: 'InsertOrderedList' },
+      { start: '## ', format: 'h2' },
+      { start: '### ', format: 'h3' },
+      { start: '#### ', format: 'h4' },
+      { start: '##### ', format: 'h5' },
+      { start: '###### ', format: 'h6' },
+      { start: '--- ', cmd: 'InsertHorizontalRule' },
+      { start: '> ', format: 'blockquote' },
+    ],
     removed_menuitems: removedMenuItems,
     image_caption: true,
     images_reuse_filename: false, // if set to true the src url gets a date appended
@@ -430,6 +444,9 @@ export function getTinymceBaseConfig(page: string): object {
       editor.addShortcut('ctrl+shift+d', 'add date/time at cursor', addDatetimeOnCursor);
       editor.addShortcut('ctrl+=', 'subscript', () => editor.execCommand('subscript'));
       editor.addShortcut('ctrl+shift+=', 'superscript', () => editor.execCommand('superscript'));
+      // format as inline code and blockquote
+      editor.addShortcut('ctrl+shift+c', 'format as inline code', function() {editor.execCommand('FormatBlock', false, 'code');});
+      editor.addShortcut('ctrl+shift+b', 'format as blockquote', function() {editor.execCommand('FormatBlock', false, 'blockquote');});
 
       // on edit page there is an autosave triggered
       if (page === 'edit') {

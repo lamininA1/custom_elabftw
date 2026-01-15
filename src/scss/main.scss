@@ -1838,3 +1838,22 @@ input:user-invalid {
 #doodleCanvas {
   touch-action: none;
 }
+
+// 코드 관련 스타일 추가
+code {
+  font-family: Menlol;
+}
+
+pre[class*=language-] {
+  border-radius: 20px;
+  background: floralwhite;
+ // antiquewhite
+ // beige
+ // cornsilk
+ // floralwhite
+  box-shadow: 0 0 10px 2px black !important;
+ }
+
+ code[class*=language-],pre[class*=language-] {
+	font-family: Menlo;
+}
