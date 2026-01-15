@@ -37,7 +37,7 @@ import 'tinymce/plugins/save';
 import 'tinymce/plugins/searchreplace';
 import 'tinymce/plugins/table';
 import 'tinymce/plugins/template';
-import 'tinymce/plugins/textpattern';
+// import 'tinymce/plugins/textpattern';
 import 'tinymce/plugins/visualblocks';
 import 'tinymce/plugins/visualchars';
 import '../js/tinymce-langs/ca_ES.js';
