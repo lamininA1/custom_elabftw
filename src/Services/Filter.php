@@ -248,6 +248,14 @@ final class Filter
             'line-height',
             'margin-left',
             'margin-right',
+            'margin-top',
+            'margin-bottom',
+            'margin',
+            'padding-top',
+            'padding-bottom',
+            'padding-left',
+            'padding-right',
+            'padding',
             'min-width',
             'text-align',
             'text-decoration',
@@ -280,4 +288,5 @@ final class Filter
         return str_replace(array("\r", "\n", ' ', "\t"), '', $pem ?? '');
     }
 }
+
 
