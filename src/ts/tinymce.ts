@@ -264,7 +264,16 @@ export function getTinymceBaseConfig(page: string): object {
         callback(res);
       });
     },
-    contextmenu: 'lists table link image',
+    contextmenu_never_use_native: true,
+    contextmenu: (editor) => {
+      const node = editor.selection.getNode();
+      const isImage = node && node.tagName === 'IMG';
+      
+      if (isImage) {
+        return 'imageverttop imagevertmiddle imagevertbottom | imagevertremove | image';
+      }
+      return 'lists table link image';
+    },
     paste_data_images: Boolean(page === 'edit'),
     // use the preprocessing function on paste event to fix the bgcolor attribute from libreoffice into proper background-color style
     paste_preprocess: function(plugin, args) {
@@ -456,6 +465,53 @@ export function getTinymceBaseConfig(page: string): object {
           typingTimer = setTimeout(doneTyping, doneTypingInterval);
         });
       }
+
+      // 이미지 vertical-align 컨텍스트 메뉴 항목 추가 (기존 스타일 유지하며 추가)
+      editor.ui.registry.addMenuItem('imageverttop', {
+        text: '이미지 위 정렬',
+        onAction: () => {
+          const img = editor.selection.getNode() as HTMLImageElement;
+          if (img.tagName === 'IMG') {
+            // setStyle은 해당 속성만 변경하고 나머지 스타일은 유지합니다
+            editor.dom.setStyle(img, 'vertical-align', 'top');
+            editor.undoManager.add();
+          }
+        },
+      });
+      
+      editor.ui.registry.addMenuItem('imagevertmiddle', {
+        text: '이미지 가운데 정렬',
+        onAction: () => {
+          const img = editor.selection.getNode() as HTMLImageElement;
+          if (img.tagName === 'IMG') {
+            editor.dom.setStyle(img, 'vertical-align', 'middle');
+            editor.undoManager.add();
+          }
+        },
+      });
+      
+      editor.ui.registry.addMenuItem('imagevertbottom', {
+        text: '이미지 아래 정렬',
+        onAction: () => {
+          const img = editor.selection.getNode() as HTMLImageElement;
+          if (img.tagName === 'IMG') {
+            editor.dom.setStyle(img, 'vertical-align', 'bottom');
+            editor.undoManager.add();
+          }
+        },
+      });
+      
+      editor.ui.registry.addMenuItem('imagevertremove', {
+        text: '이미지 정렬 제거',
+        onAction: () => {
+          const img = editor.selection.getNode() as HTMLImageElement;
+          if (img.tagName === 'IMG') {
+            // vertical-align 속성만 제거하고 나머지 스타일은 유지
+            editor.dom.setStyle(img, 'vertical-align', '');
+            editor.undoManager.add();
+          }
+        },
+      });
 
       // sort down icon from COLLECTION: Dazzle Line Icons LICENSE: CC Attribution License AUTHOR: Dazzle UI
       editor.ui.registry.addIcon('sort-amount-down-alt', '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 12h8m-8-4h8m-8 8h8M6 7v10m0 0-3-3m3 3 3-3" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'), // eslint-disable-line
