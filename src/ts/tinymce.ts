@@ -281,7 +281,7 @@ tinymce.PluginManager.add('image-align', (ed) => {
 // options for tinymce to pass to tinymce.init()
 export function getTinymceBaseConfig(page: string): object {
   let plugins = 'accordion advlist anchor autolink autoresize table searchreplace code fullscreen insertdatetime charmap lists save image media link pagebreak codesample template textpattern mention visualblocks visualchars emoticons preview image-align';
-  let toolbar1 = 'custom-save preview | undo redo | styles fontsize bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | superscript subscript | bullist numlist outdent indent | forecolor backcolor | charmap emoticons adddate | codesample | link | sort-table';
+  let toolbar1 = 'custom-save preview | undo redo | styles fontsize lineheight bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | superscript subscript | bullist numlist outdent indent | forecolor backcolor | charmap emoticons adddate | codesample | link | sort-table';
   let removedMenuItems = 'newdocument, image, anchor';
   let fileMenuItems = 'preview | print';
   if (page === 'edit') {
@@ -314,6 +314,8 @@ export function getTinymceBaseConfig(page: string): object {
     pagebreak_split_block: true,
     pagebreak_separator: '<div class="page-break"></div>',
     toolbar1: toolbar1,
+    // line height formats
+    line_height_formats: '1 1.2 1.4 1.5 1.6 1.8 2 2.5 3 3.5 4',
     // this addresses CVE-2024-29881, it defaults to true in 7.0, so can be removed in tiny 7.0 TODO
     convert_unsafe_embeds: true,
     // markdown-like text patterns for quick formatting
