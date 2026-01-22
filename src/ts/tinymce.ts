@@ -195,9 +195,92 @@ const imagesUploadHandler = (blobInfo: TinyMCEBlobInfo) => new Promise((resolve,
   }
 });
 
+// 이미지 정렬 플러그인 등록
+tinymce.PluginManager.add('image-align', (ed) => {
+  // 이미지를 찾는 헬퍼 함수
+  const getSelectedImage = (): HTMLImageElement | null => {
+    const node = ed.selection.getNode();
+    if (node && node.tagName === 'IMG') {
+      return node as HTMLImageElement;
+    }
+    // 부모 요소에서 이미지 찾기
+    if (node && (node as HTMLElement).closest) {
+      const img = (node as HTMLElement).closest('img');
+      if (img) {
+        return img as HTMLImageElement;
+      }
+    }
+    return null;
+  };
+
+  // 이미지 위 정렬 메뉴 항목
+  ed.ui.registry.addMenuItem('imageverttop', {
+    text: '이미지 위 정렬',
+    onAction: () => {
+      const img = getSelectedImage();
+      if (img) {
+        ed.dom.setStyle(img, 'vertical-align', 'top');
+        ed.undoManager.add();
+      }
+    },
+  });
+
+  // 이미지 가운데 정렬 메뉴 항목
+  ed.ui.registry.addMenuItem('imagevertmiddle', {
+    text: '이미지 가운데 정렬',
+    onAction: () => {
+      const img = getSelectedImage();
+      if (img) {
+        ed.dom.setStyle(img, 'vertical-align', 'middle');
+        ed.undoManager.add();
+      }
+    },
+  });
+
+  // 이미지 아래 정렬 메뉴 항목
+  ed.ui.registry.addMenuItem('imagevertbottom', {
+    text: '이미지 아래 정렬',
+    onAction: () => {
+      const img = getSelectedImage();
+      if (img) {
+        ed.dom.setStyle(img, 'vertical-align', 'bottom');
+        ed.undoManager.add();
+      }
+    },
+  });
+
+  // 이미지 정렬 제거 메뉴 항목
+  ed.ui.registry.addMenuItem('imagevertremove', {
+    text: '이미지 정렬 제거',
+    onAction: () => {
+      const img = getSelectedImage();
+      if (img) {
+        ed.dom.setStyle(img, 'vertical-align', '');
+        ed.undoManager.add();
+      }
+    },
+  });
+
+  // 컨텍스트 메뉴에 이미지 정렬 옵션 추가 (이미지 선택 시에만 표시)
+  ed.ui.registry.addContextMenu('image-align', {
+    update: (element) => {
+      // 이미지 요소인 경우에만 메뉴 표시
+      // element가 이미지이거나, element의 부모 중에 이미지가 있는 경우
+      const img = element && element.tagName === 'IMG' 
+        ? element as HTMLImageElement 
+        : (element as HTMLElement)?.closest?.('img') as HTMLImageElement;
+      
+      if (img && img.src) {
+        return 'imageverttop imagevertmiddle imagevertbottom | imagevertremove';
+      }
+      return '';
+    },
+  });
+});
+
 // options for tinymce to pass to tinymce.init()
 export function getTinymceBaseConfig(page: string): object {
-  let plugins = 'accordion advlist anchor autolink autoresize table searchreplace code fullscreen insertdatetime charmap lists save image media link pagebreak codesample template textpattern mention visualblocks visualchars emoticons preview';
+  let plugins = 'accordion advlist anchor autolink autoresize table searchreplace code fullscreen insertdatetime charmap lists save image media link pagebreak codesample template textpattern mention visualblocks visualchars emoticons preview image-align';
   let toolbar1 = 'custom-save preview | undo redo | styles fontsize bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | superscript subscript | bullist numlist outdent indent | forecolor backcolor | charmap emoticons adddate | codesample | link | sort-table';
   let removedMenuItems = 'newdocument, image, anchor';
   let fileMenuItems = 'preview | print';
@@ -264,16 +347,7 @@ export function getTinymceBaseConfig(page: string): object {
         callback(res);
       });
     },
-    contextmenu_never_use_native: true,
-    contextmenu: (editor) => {
-      const node = editor.selection.getNode();
-      const isImage = node && node.tagName === 'IMG';
-      
-      if (isImage) {
-        return 'imageverttop imagevertmiddle imagevertbottom | imagevertremove | image';
-      }
-      return 'lists table link image';
-    },
+    contextmenu: 'lists table link image image-align',
     paste_data_images: Boolean(page === 'edit'),
     // use the preprocessing function on paste event to fix the bgcolor attribute from libreoffice into proper background-color style
     paste_preprocess: function(plugin, args) {
@@ -466,53 +540,6 @@ export function getTinymceBaseConfig(page: string): object {
         });
       }
 
-      // 이미지 vertical-align 컨텍스트 메뉴 항목 추가 (기존 스타일 유지하며 추가)
-      editor.ui.registry.addMenuItem('imageverttop', {
-        text: '이미지 위 정렬',
-        onAction: () => {
-          const img = editor.selection.getNode() as HTMLImageElement;
-          if (img.tagName === 'IMG') {
-            // setStyle은 해당 속성만 변경하고 나머지 스타일은 유지합니다
-            editor.dom.setStyle(img, 'vertical-align', 'top');
-            editor.undoManager.add();
-          }
-        },
-      });
-      
-      editor.ui.registry.addMenuItem('imagevertmiddle', {
-        text: '이미지 가운데 정렬',
-        onAction: () => {
-          const img = editor.selection.getNode() as HTMLImageElement;
-          if (img.tagName === 'IMG') {
-            editor.dom.setStyle(img, 'vertical-align', 'middle');
-            editor.undoManager.add();
-          }
-        },
-      });
-      
-      editor.ui.registry.addMenuItem('imagevertbottom', {
-        text: '이미지 아래 정렬',
-        onAction: () => {
-          const img = editor.selection.getNode() as HTMLImageElement;
-          if (img.tagName === 'IMG') {
-            editor.dom.setStyle(img, 'vertical-align', 'bottom');
-            editor.undoManager.add();
-          }
-        },
-      });
-      
-      editor.ui.registry.addMenuItem('imagevertremove', {
-        text: '이미지 정렬 제거',
-        onAction: () => {
-          const img = editor.selection.getNode() as HTMLImageElement;
-          if (img.tagName === 'IMG') {
-            // vertical-align 속성만 제거하고 나머지 스타일은 유지
-            editor.dom.setStyle(img, 'vertical-align', '');
-            editor.undoManager.add();
-          }
-        },
-      });
-
       // sort down icon from COLLECTION: Dazzle Line Icons LICENSE: CC Attribution License AUTHOR: Dazzle UI
       editor.ui.registry.addIcon('sort-amount-down-alt', '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 12h8m-8-4h8m-8 8h8M6 7v10m0 0-3-3m3 3 3-3" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'), // eslint-disable-line
       // add toggle button for table sorting
@@ -632,4 +659,3 @@ export function getTinymceBaseConfig(page: string): object {
     },
   };
 }
-
