@@ -262,6 +262,7 @@ final class Filter
             'word-spacing',
             'width',
             'white-space',
+            'vertical-align',
         ));
         // allow any image size, see #3800
         $config->set('CSS.MaxImgLength', null);

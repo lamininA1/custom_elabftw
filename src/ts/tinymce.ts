@@ -519,18 +519,36 @@ export function getTinymceBaseConfig(page: string): object {
     style_formats_merge: true,
     style_formats: [
       {
-        title: 'Image Left',
+        title: '이미지 왼쪽 정렬',
         selector: 'img',
         styles: {
           'float': 'left',
           'margin': '0 10px 0 10px',
         },
       }, {
-        title: 'Image Right',
+        title: '이미지 오른쪽 정렬',
         selector: 'img',
         styles: {
           'float': 'right',
           'margin': '0 0 10px 10px',
+        },
+      }, {
+        title: '이미지 상단 정렬',
+        selector: 'img',
+        styles: {
+          'vertical-align': 'top',
+        },
+      }, {
+        title: '이미지 중앙 정렬',
+        selector: 'img',
+        styles: {
+          'vertical-align': 'middle',
+        },
+      }, {
+        title: '이미지 하단 정렬',
+        selector: 'img',
+        styles: {
+          'vertical-align': 'bottom',
         },
       },
     ],
