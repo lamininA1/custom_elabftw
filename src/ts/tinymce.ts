@@ -278,9 +278,132 @@ tinymce.PluginManager.add('image-align', (ed) => {
   });
 });
 
+// 테이블 열 너비 설정 플러그인 등록
+tinymce.PluginManager.add('table-column-width', (ed) => {
+  // 현재 선택된 셀이 속한 열의 인덱스를 찾는 함수
+  const getColumnIndex = (cell: HTMLTableCellElement, table: HTMLTableElement): number => {
+    let colIndex = 0;
+    const row = cell.parentElement as HTMLTableRowElement;
+    if (!row) return 0;
+    
+    for (let i = 0; i < row.cells.length; i++) {
+      if (row.cells[i] === cell) {
+        return colIndex;
+      }
+      // colspan을 고려하여 인덱스 계산
+      colIndex += row.cells[i].colSpan || 1;
+    }
+    return 0;
+  };
+
+  // 특정 열의 모든 셀을 찾는 함수
+  const getColumnCells = (table: HTMLTableElement, colIndex: number): HTMLTableCellElement[] => {
+    const cells: HTMLTableCellElement[] = [];
+    let currentColIndex = 0;
+    
+    for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
+      const row = table.rows[rowIndex];
+      let cellColIndex = 0;
+      
+      for (let i = 0; i < row.cells.length; i++) {
+        const cell = row.cells[i];
+        const colspan = cell.colSpan || 1;
+        
+        // 현재 셀이 목표 열을 포함하는지 확인
+        if (cellColIndex <= colIndex && colIndex < cellColIndex + colspan) {
+          cells.push(cell);
+          break;
+        }
+        
+        cellColIndex += colspan;
+      }
+    }
+    
+    return cells;
+  };
+
+  // 열 너비 설정 메뉴 항목
+  ed.ui.registry.addMenuItem('setcolumnwidth', {
+    text: '열 너비 설정',
+    onAction: () => {
+      const node = ed.selection.getNode();
+      const cell = node.closest('td, th') as HTMLTableCellElement;
+      const table = node.closest('table') as HTMLTableElement;
+      
+      if (!cell || !table) {
+        ed.windowManager.alert('테이블 셀을 선택해주세요.');
+        return;
+      }
+      
+      const colIndex = getColumnIndex(cell, table);
+      const currentWidth = ed.dom.getStyle(cell, 'width') || '';
+      
+      ed.windowManager.open({
+        title: '열 너비 설정',
+        body: {
+          type: 'panel',
+          items: [
+            {
+              type: 'input',
+              name: 'width',
+              label: '너비 (예: 100px, 20%, auto)',
+              placeholder: '100px 또는 20%',
+              value: currentWidth,
+            },
+          ],
+        },
+        buttons: [
+          {
+            type: 'cancel',
+            text: '취소',
+          },
+          {
+            type: 'submit',
+            text: '적용',
+            primary: true,
+          },
+        ],
+        onSubmit: (api) => {
+          const width = api.getData().width.trim();
+          const columnCells = getColumnCells(table, colIndex);
+          
+          if (width) {
+            // 모든 열 셀에 너비 설정
+            columnCells.forEach(cell => {
+              ed.dom.setStyle(cell, 'width', width);
+            });
+          } else {
+            // 너비 제거
+            columnCells.forEach(cell => {
+              ed.dom.setStyle(cell, 'width', '');
+            });
+          }
+          
+          ed.undoManager.add();
+          api.close();
+        },
+      });
+    },
+  });
+
+  // 컨텍스트 메뉴에 열 너비 설정 옵션 추가 (테이블 셀 선택 시에만 표시)
+  ed.ui.registry.addContextMenu('table-column-width', {
+    update: (element) => {
+      const cell = element && (element.tagName === 'TD' || element.tagName === 'TH')
+        ? element as HTMLTableCellElement
+        : (element as HTMLElement)?.closest?.('td, th') as HTMLTableCellElement;
+      
+      if (cell && cell.closest('table')) {
+        return 'setcolumnwidth';
+      }
+      return '';
+    },
+  });
+});
+
 // options for tinymce to pass to tinymce.init()
 export function getTinymceBaseConfig(page: string): object {
-  let plugins = 'accordion advlist anchor autolink autoresize table searchreplace code fullscreen insertdatetime charmap lists save image media link pagebreak codesample template textpattern mention visualblocks visualchars emoticons preview image-align';
+  let plugins = 'accordion advlist anchor autolink autoresize table searchreplace code fullscreen insertdatetime charmap lists save image media link pagebreak codesample template textpattern mention visualblocks visualchars emoticons preview image-align table-column-width';
   let toolbar1 = 'custom-save preview | undo redo | styles fontsize lineheight bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | superscript subscript | bullist numlist outdent indent | forecolor backcolor | charmap emoticons adddate | codesample | link | sort-table';
   let removedMenuItems = 'newdocument, image, anchor';
   let fileMenuItems = 'preview | print';
@@ -349,7 +472,7 @@ export function getTinymceBaseConfig(page: string): object {
         callback(res);
       });
     },
-    contextmenu: 'lists table link image image-align',
+    contextmenu: 'lists table link image image-align table-column-width',
     paste_data_images: Boolean(page === 'edit'),
     // use the preprocessing function on paste event to fix the bgcolor attribute from libreoffice into proper background-color style
     paste_preprocess: function(plugin, args) {
