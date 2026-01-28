@@ -48,17 +48,26 @@ final class MpdfProvider implements MpdfProviderInterface
         // Convert to absolute path for mPDF
         $fontsPath = realpath($fontsPath) ?: $fontsPath;
         
-        // Add Pretendard GOV font configuration
-        // Font names in mPDF must be lowercase
-        // Standard variants: R=Regular, B=Bold, I=Italic, BI=Bold Italic
-        // Note: mPDF only supports R, B, I, BI keys. Other weights are handled via CSS font-weight
-        // File names must match exactly (case-sensitive on some systems)
-        $fontData['pretendardgov'] = array(
-            'R' => 'PretendardGOV-Regular.ttf',      // Regular (400) - default
-            'B' => 'PretendardGOV-Bold.ttf',         // Bold (700)
-            'I' => 'PretendardGOV-Regular.ttf',      // Italic (using Regular as base)
-            'BI' => 'PretendardGOV-Bold.ttf',        // Bold Italic
-        );
+        // Verify font files exist before registering
+        $regularFont = $fontsPath . '/PretendardGOV-Regular.ttf';
+        $boldFont = $fontsPath . '/PretendardGOV-Bold.ttf';
+        $usePretendardGov = false;
+        
+        // Only register Pretendard GOV if font files exist
+        if (file_exists($regularFont) && file_exists($boldFont) && is_readable($regularFont) && is_readable($boldFont)) {
+            // Add Pretendard GOV font configuration
+            // Font names in mPDF must be lowercase
+            // Standard variants: R=Regular, B=Bold, I=Italic, BI=Bold Italic
+            // Note: mPDF only supports R, B, I, BI keys. Other weights are handled via CSS font-weight
+            // File names must match exactly (case-sensitive on some systems)
+            $fontData['pretendardgov'] = array(
+                'R' => 'PretendardGOV-Regular.ttf',      // Regular (400) - default
+                'B' => 'PretendardGOV-Bold.ttf',         // Bold (700)
+                'I' => 'PretendardGOV-Regular.ttf',      // Italic (using Regular as base)
+                'BI' => 'PretendardGOV-Bold.ttf',        // Bold Italic
+            );
+            $usePretendardGov = true;
+        }
 
         // create the pdf
         $mpdf = new Mpdf(array(
@@ -67,7 +76,7 @@ final class MpdfProvider implements MpdfProviderInterface
             'mode' => 'utf-8',
             'fontDir' => array_merge($fontDirs, array($fontsPath)),
             'fontdata' => $fontData,
-            'default_font' => 'pretendardgov',
+            'default_font' => $usePretendardGov ? 'pretendardgov' : 'DejaVu',
             // disallow getting external things
             'whitelistStreamWrappers' => array(''),
         ));
@@ -86,9 +95,11 @@ final class MpdfProvider implements MpdfProviderInterface
 
         // set metadata
         $mpdf->SetAuthor($this->author);
-        $mpdf->SetTitle('eLabFTW pdf');
-        $mpdf->SetSubject('eLabFTW pdf');
-        $mpdf->SetCreator('www.elabftw.net');
+        $fontInfo = $usePretendardGov ? 'Pretendard GOV' : 'DejaVu';
+        $mpdf->SetTitle('eLabFTW PDF - Font: ' . $fontInfo);
+        $mpdf->SetSubject('eLabFTW PDF Document (Font: ' . $fontInfo . ')');
+        $mpdf->SetCreator('eLabFTW with ' . $fontInfo . ' font');
+        $mpdf->SetKeywords('elabftw, pdf, ' . strtolower($fontInfo));
 
         return $mpdf;
     }

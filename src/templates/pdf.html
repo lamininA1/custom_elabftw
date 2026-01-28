@@ -16,7 +16,7 @@
     {% endif %}
     <div class='footer-block footer'>
       <p style='font-size:6pt;'>PDF generated with <a href='https://www.elabftw.net'>elabftw</a>, a free and open source lab notebook<br>
-      File generated on {DATE d-m-Y} at {DATE H:i}</p>
+      File generated on {DATE d-m-Y} at {DATE H:i} | Font: Pretendard GOV</p>
       <p>{PAGENO} / {nb}</p>
     </div>
   </htmlpagefooter>
@@ -45,6 +45,7 @@
           <strong>{{ 'Status'|trans }}:</strong> {{ entityData.status_title }}<br>
         {% endif %}
         <strong>{{ 'Created by'|trans }}:</strong> {{ entityData.fullname }}<br>
+        <strong style="color: #29aeb9; font-weight: bold;">📝 Font:</strong> <span style="font-family: 'pretendardgov', sans-serif; font-weight: 500; color: #29aeb9;">Pretendard GOV 폰트 적용됨 ✓</span><br>
       </p>
     </div>
   </div>
