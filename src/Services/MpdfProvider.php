@@ -15,6 +15,7 @@ namespace Elabftw\Services;
 use Elabftw\Elabftw\FsTools;
 use Elabftw\Interfaces\MpdfProviderInterface;
 use Mpdf\Config\ConfigVariables;
+use Mpdf\Config\FontVariables;
 use Mpdf\Mpdf;
 use Override;
 
@@ -39,13 +40,39 @@ final class MpdfProvider implements MpdfProviderInterface
         $defaultConfig = (new ConfigVariables())->getDefaults();
         $fontDirs = $defaultConfig['fontDir'];
 
+        // Get default font data and add Pretendard GOV fonts
+        $defaultFontConfig = (new FontVariables())->getDefaults();
+        $fontData = $defaultFontConfig['fontdata'];
+
+        $fontsPath = dirname(__DIR__, 2) . '/web/assets/fonts';
+        
+        // Add Pretendard GOV font configuration
+        // Font names in mPDF must be lowercase
+        // Standard variants: R=Regular, B=Bold, I=Italic, BI=Bold Italic
+        // Additional weight variants can be used with numeric keys
+        $fontData['pretendardgov'] = array(
+            'R' => 'PretendardGOV-Regular.ttf',      // Regular (400)
+            'B' => 'PretendardGOV-Bold.ttf',        // Bold (700)
+            'I' => 'PretendardGOV-Regular.ttf',     // Italic (Regular as base)
+            'BI' => 'PretendardGOV-Bold.ttf',       // Bold Italic
+            // Additional weight variants
+            '100' => 'PretendardGOV-Thin.ttf',      // Thin
+            '200' => 'PretendardGOV-ExtraLight.ttf', // ExtraLight
+            '300' => 'PretendardGOV-Light.ttf',    // Light
+            '500' => 'PretendardGOV-Medium.ttf',   // Medium
+            '600' => 'PretendardGOV-SemiBold.ttf',  // SemiBold
+            '800' => 'PretendardGOV-ExtraBold.ttf', // ExtraBold
+            '900' => 'PretendardGOV-Black.ttf',    // Black
+        );
+
         // create the pdf
         $mpdf = new Mpdf(array(
             'format' => $this->format,
             'tempDir' => FsTools::getCacheFolder('mpdf'),
             'mode' => 'utf-8',
-            'fontDir' => array_merge($fontDirs, array(dirname(__DIR__, 2) . '/web/assets/fonts')),
-            'default_font' => 'DejaVu',
+            'fontDir' => array_merge($fontDirs, array($fontsPath)),
+            'fontdata' => $fontData,
+            'default_font' => 'pretendardgov',
             // disallow getting external things
             'whitelistStreamWrappers' => array(''),
         ));
