@@ -53,6 +53,18 @@ final class MpdfProvider implements MpdfProviderInterface
         $boldFont = $fontsPath . '/PretendardGOV-Bold.ttf';
         $usePretendardGov = false;
         
+        // Debug: Log font path and file existence
+        // Remove this after debugging
+        if (function_exists('error_log')) {
+            error_log('mPDF Font Debug - Fonts Path: ' . $fontsPath);
+            error_log('mPDF Font Debug - Regular Font Exists: ' . (file_exists($regularFont) ? 'YES' : 'NO'));
+            error_log('mPDF Font Debug - Bold Font Exists: ' . (file_exists($boldFont) ? 'YES' : 'NO'));
+            if (file_exists($regularFont)) {
+                error_log('mPDF Font Debug - Regular Font Path: ' . $regularFont);
+                error_log('mPDF Font Debug - Regular Font Readable: ' . (is_readable($regularFont) ? 'YES' : 'NO'));
+            }
+        }
+        
         // Only register Pretendard GOV if font files exist
         if (file_exists($regularFont) && file_exists($boldFont) && is_readable($regularFont) && is_readable($boldFont)) {
             // Add Pretendard GOV font configuration
@@ -67,8 +79,31 @@ final class MpdfProvider implements MpdfProviderInterface
                 'BI' => 'PretendardGOV-Bold.ttf',        // Bold Italic
             );
             $usePretendardGov = true;
+            
+            // Debug: Log font registration
+            if (function_exists('error_log')) {
+                error_log('mPDF Font Debug - Pretendard GOV font registered successfully');
+                error_log('mPDF Font Debug - Font Data: ' . print_r($fontData['pretendardgov'], true));
+            }
+        } else {
+            // Debug: Log why font registration failed
+            if (function_exists('error_log')) {
+                error_log('mPDF Font Debug - Pretendard GOV font registration FAILED');
+                if (!file_exists($regularFont)) {
+                    error_log('mPDF Font Debug - Regular font file NOT FOUND: ' . $regularFont);
+                }
+                if (!file_exists($boldFont)) {
+                    error_log('mPDF Font Debug - Bold font file NOT FOUND: ' . $boldFont);
+                }
+            }
         }
 
+        // Debug: Log fontDir and fontData before creating mPDF instance
+        if (function_exists('error_log')) {
+            error_log('mPDF Font Debug - Font Dir Array: ' . print_r(array_merge($fontDirs, array($fontsPath)), true));
+            error_log('mPDF Font Debug - Default Font: ' . ($usePretendardGov ? 'pretendardgov' : 'DejaVu'));
+        }
+        
         // create the pdf
         $mpdf = new Mpdf(array(
             'format' => $this->format,
@@ -80,6 +115,17 @@ final class MpdfProvider implements MpdfProviderInterface
             // disallow getting external things
             'whitelistStreamWrappers' => array(''),
         ));
+        
+        // Debug: Verify font was actually registered
+        if (function_exists('error_log') && $usePretendardGov) {
+            // Check if font is available in mPDF instance
+            $availableFonts = $mpdf->fontdata ?? array();
+            if (isset($availableFonts['pretendardgov'])) {
+                error_log('mPDF Font Debug - Font confirmed in mPDF instance');
+            } else {
+                error_log('mPDF Font Debug - WARNING: Font NOT found in mPDF instance after creation!');
+            }
+        }
 
         // make sure we can read the pdf in a long time
         // will embed the font and make the pdf bigger

@@ -53,6 +53,22 @@ abstract class AbstractMakePdf extends AbstractMake implements PdfMakerInterface
     protected function getCss(): string
     {
         $assetsFs = FsTools::getFs(dirname(__DIR__, 2) . '/web/assets');
-        return $assetsFs->read('pdf.min.css');
+        $css = $assetsFs->read('pdf.min.css');
+        
+        // Add explicit font-family declarations to ensure Pretendard GOV is used
+        // This ensures the font is applied even if the CSS doesn't specify it clearly
+        $additionalCss = '
+        /* Force Pretendard GOV font for all elements */
+        body, p, div, span, h1, h2, h3, h4, h5, h6, td, th, li, a, strong, em {
+            font-family: "pretendardgov", "PretendardGOV", sans-serif !important;
+        }
+        /* Explicitly set font for metadata sections */
+        .entry-meta, .entry-meta p, .entry-meta strong, .entry-meta .tag,
+        .entry-title, #header, #header * {
+            font-family: "pretendardgov", "PretendardGOV", sans-serif !important;
+        }
+        ';
+        
+        return $css . $additionalCss;
     }
 }

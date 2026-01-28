@@ -14,9 +14,19 @@
   margin: 1cm;
 }
 
+/* 
+ * Note: mPDF does not use CSS @font-face for TTF fonts.
+ * Fonts must be registered via fontData in MpdfProvider.php.
+ * This CSS only references the font name registered in fontData.
+ */
 body {
-  font-family: 'pretendardgov', sans-serif;
+  font-family: 'pretendardgov', 'PretendardGOV', sans-serif;
   font-kerning: normal;
+}
+
+/* Ensure all text elements use Pretendard GOV */
+* {
+  font-family: 'pretendardgov', 'PretendardGOV', sans-serif;
 }
 
 /* TITLES */
@@ -148,12 +158,18 @@ tr:nth-child(odd) {
   margin-bottom: 1em;
   overflow: hidden;
   position: relative;
+  font-family: 'pretendardgov', 'PretendardGOV', sans-serif !important;
+  
+  * {
+    font-family: 'pretendardgov', 'PretendardGOV', sans-serif !important;
+  }
 }
 
 // use floats as mPDF does not allow display flex
 .entry-title {
   float: left;
   width: 60%;
+  font-family: 'pretendardgov', 'PretendardGOV', sans-serif !important;
 }
 
 .entry-meta {
@@ -161,6 +177,19 @@ tr:nth-child(odd) {
   font-size: 90%;
   text-align: right;
   width: 35%;
+  font-family: 'pretendardgov', 'PretendardGOV', sans-serif !important;
+  
+  p {
+    font-family: 'pretendardgov', 'PretendardGOV', sans-serif !important;
+  }
+  
+  strong {
+    font-family: 'pretendardgov', 'PretendardGOV', sans-serif !important;
+  }
+  
+  .tag {
+    font-family: 'pretendardgov', 'PretendardGOV', sans-serif !important;
+  }
 }
 
 .footer-block {

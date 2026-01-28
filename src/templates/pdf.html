@@ -21,31 +21,31 @@
     </div>
   </htmlpagefooter>
 
-  <div id='header'>
-    <h1 class='entry-title'>
+  <div id='header' style="font-family: 'pretendardgov', sans-serif;">
+    <h1 class='entry-title' style="font-family: 'pretendardgov', sans-serif;">
       {% if entityData.custom_id %}
-        <span style='color:#4d4c4c'>{{ entityData.custom_id }}</span>
+        <span style='color:#4d4c4c; font-family: "pretendardgov", sans-serif;'>{{ entityData.custom_id }}</span>
       {% endif %}
-      {{ entityData.title }}
+      <span style="font-family: 'pretendardgov', sans-serif;">{{ entityData.title }}</span>
     </h1>
-    <div class="entry-meta">
-      <p>
-        <strong>{{ 'Date'|trans }}:</strong> {{ date }}<br>
+    <div class="entry-meta" style="font-family: 'pretendardgov', sans-serif;">
+      <p style="font-family: 'pretendardgov', sans-serif;">
+        <strong style="font-family: 'pretendardgov', sans-serif;">{{ 'Date'|trans }}:</strong> <span style="font-family: 'pretendardgov', sans-serif;">{{ date }}</span><br>
         {% if entityData.tags %}
           {% set tags = entityData.tags|split('|') %}
-          <strong>{{ 'Tags'|trans }}:</strong>
+          <strong style="font-family: 'pretendardgov', sans-serif;">{{ 'Tags'|trans }}:</strong>
           {% for tag in tags %}
-            <span class='tag'>{{ tag }}</span>
+            <span class='tag' style="font-family: 'pretendardgov', sans-serif;">{{ tag }}</span>
           {% endfor %}<br>
         {% endif %}
         {% if entityData.category_title %}
-          <strong>{{ 'Category'|trans }}:</strong> {{ entityData.category_title }}<br>
+          <strong style="font-family: 'pretendardgov', sans-serif;">{{ 'Category'|trans }}:</strong> <span style="font-family: 'pretendardgov', sans-serif;">{{ entityData.category_title }}</span><br>
         {% endif %}
         {% if entityData.status_title %}
-          <strong>{{ 'Status'|trans }}:</strong> {{ entityData.status_title }}<br>
+          <strong style="font-family: 'pretendardgov', sans-serif;">{{ 'Status'|trans }}:</strong> <span style="font-family: 'pretendardgov', sans-serif;">{{ entityData.status_title }}</span><br>
         {% endif %}
-        <strong>{{ 'Created by'|trans }}:</strong> {{ entityData.fullname }}<br>
-        <strong style="color: #29aeb9; font-weight: bold;">📝 Font:</strong> <span style="font-family: 'pretendardgov', sans-serif; font-weight: 500; color: #29aeb9;">Pretendard GOV 폰트 적용됨 ✓</span><br>
+        <strong style="font-family: 'pretendardgov', sans-serif;">{{ 'Created by'|trans }}:</strong> <span style="font-family: 'pretendardgov', sans-serif;">{{ entityData.fullname }}</span><br>
+        <strong style="color: #29aeb9; font-weight: bold; font-family: 'pretendardgov', sans-serif;">📝 Font:</strong> <span style="font-family: 'pretendardgov', sans-serif; font-weight: 500; color: #29aeb9;">Pretendard GOV 폰트 적용됨 ✓</span><br>
       </p>
     </div>
   </div>
