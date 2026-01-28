@@ -58,13 +58,22 @@ abstract class AbstractMakePdf extends AbstractMake implements PdfMakerInterface
         // Add explicit font-family declarations to ensure Pretendard GOV is used
         // This ensures the font is applied even if the CSS doesn't specify it clearly
         $additionalCss = '
-        /* Force Pretendard GOV font for all elements */
-        body, p, div, span, h1, h2, h3, h4, h5, h6, td, th, li, a, strong, em {
+        /* Force Pretendard GOV font for ALL elements */
+        *, *::before, *::after {
             font-family: "pretendardgov", "PretendardGOV", sans-serif !important;
         }
-        /* Explicitly set font for metadata sections */
-        .entry-meta, .entry-meta p, .entry-meta strong, .entry-meta .tag,
-        .entry-title, #header, #header * {
+        /* Explicitly set font for all text-containing elements */
+        body, p, div, span, h1, h2, h3, h4, h5, h6, 
+        td, th, li, ul, ol, 
+        a, strong, em, b, i, u,
+        section, article, aside, 
+        .pdf-ul, .pdf-ul *, .elabid, .timestamped-block, .timestamped-block *,
+        .footer-block, .footer-block *, .signatures, .signatures *,
+        #infoblock, #infoblock *,
+        table, table *, table th, table td,
+        blockquote, blockquote *, code, pre,
+        .entry-meta, .entry-meta *, .entry-title, .entry-title *,
+        #header, #header * {
             font-family: "pretendardgov", "PretendardGOV", sans-serif !important;
         }
         ';

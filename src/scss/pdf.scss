@@ -26,28 +26,46 @@ body {
 
 /* Ensure all text elements use Pretendard GOV */
 * {
-  font-family: 'pretendardgov', 'PretendardGOV', sans-serif;
+  font-family: 'pretendardgov', 'PretendardGOV', sans-serif !important;
+}
+
+/* Explicitly set font for all text-containing elements */
+p, div, span, h1, h2, h3, h4, h5, h6, 
+td, th, li, ul, ol, 
+a, strong, em, b, i, u,
+section, article, aside, 
+.pdf-ul, .elabid, .timestamped-block,
+.footer-block, .signatures,
+#infoblock, #infoblock *,
+table, table *, 
+blockquote, code, pre {
+  font-family: 'pretendardgov', 'PretendardGOV', sans-serif !important;
 }
 
 /* TITLES */
 h1 {
   font-size: 150%;
+  font-family: 'pretendardgov', 'PretendardGOV', sans-serif !important;
 }
 
 h2 {
   font-size: 140%;
+  font-family: 'pretendardgov', 'PretendardGOV', sans-serif !important;
 }
 
 h3 {
   font-size: 130%;
+  font-family: 'pretendardgov', 'PretendardGOV', sans-serif !important;
 }
 
 h4 {
   font-size: 120%;
+  font-family: 'pretendardgov', 'PretendardGOV', sans-serif !important;
 }
 
 h5 {
   font-size: 110%;
+  font-family: 'pretendardgov', 'PretendardGOV', sans-serif !important;
 }
 
 a {
@@ -58,6 +76,7 @@ a {
 code {
   background-color: #eee;
   border: 1px dotted #ccc;
+  font-family: 'pretendardgov', 'PretendardGOV', sans-serif !important;
 }
 
 /* fix metadata extra fields having numbers in pdf */
@@ -76,6 +95,7 @@ table,
 th,
 td {
   border: 1px solid #797979;
+  font-family: 'pretendardgov', 'PretendardGOV', sans-serif !important;
 }
 
 table td {
@@ -114,12 +134,14 @@ tr:nth-child(odd) {
   border-radius: 5px;
   margin: 5px;
   padding: 7px;
+  font-family: 'pretendardgov', 'PretendardGOV', sans-serif !important;
 }
 
 .elabid {
   color: variables.$strongest;
   font-size: 8pt;
   text-align: right;
+  font-family: 'pretendardgov', 'PretendardGOV', sans-serif !important;
 }
 
 .barcode {
@@ -151,6 +173,11 @@ tr:nth-child(odd) {
   border-radius: 5px;
   margin-top: 1em;
   width: 100%;
+  font-family: 'pretendardgov', 'PretendardGOV', sans-serif !important;
+  
+  * {
+    font-family: 'pretendardgov', 'PretendardGOV', sans-serif !important;
+  }
 }
 
 #header {
@@ -196,6 +223,11 @@ tr:nth-child(odd) {
   border-top: 1px solid #dcdddc;
   font-size: 80%;
   text-align: right;
+  font-family: 'pretendardgov', 'PretendardGOV', sans-serif !important;
+  
+  * {
+    font-family: 'pretendardgov', 'PretendardGOV', sans-serif !important;
+  }
 }
 
 .timestamped-block {
@@ -207,6 +239,11 @@ tr:nth-child(odd) {
   margin: 7px 0;
   padding-left: 7px;
   width: 100%;
+  font-family: 'pretendardgov', 'PretendardGOV', sans-serif !important;
+  
+  * {
+    font-family: 'pretendardgov', 'PretendardGOV', sans-serif !important;
+  }
 }
 
 .signatures {
@@ -237,4 +274,9 @@ blockquote {
   border-left: 10px solid variables.$medium;
   margin: 1.5em 10px;
   padding: 0.5em 10px;
+  font-family: 'pretendardgov', 'PretendardGOV', sans-serif !important;
+  
+  * {
+    font-family: 'pretendardgov', 'PretendardGOV', sans-serif !important;
+  }
 }
