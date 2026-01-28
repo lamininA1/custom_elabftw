@@ -3,9 +3,8 @@
   <head>
     <style>{{ css|raw }}</style>
     {{ useCjk ? '<style>td { font-family:sun-extA; }</style>' }}
-    <style>body { font-family: 'pretendardgov', sans-serif; }</style>
   </head>
-  <body {{ useCjk ? " style='font-family:sun-extA;'" : " style='font-family:pretendardgov,sans-serif;'" }}>
+  <body {{ useCjk ? " style='font-family:sun-extA;'" }}>
   <htmlpagefooter name='footer'>
     {% if pdfSig %}
       <div class='footer-block signatures'>
@@ -16,36 +15,35 @@
     {% endif %}
     <div class='footer-block footer'>
       <p style='font-size:6pt;'>PDF generated with <a href='https://www.elabftw.net'>elabftw</a>, a free and open source lab notebook<br>
-      File generated on {DATE d-m-Y} at {DATE H:i} | Font: Pretendard GOV</p>
+      File generated on {DATE d-m-Y} at {DATE H:i}</p>
       <p>{PAGENO} / {nb}</p>
     </div>
   </htmlpagefooter>
 
-  <div id='header' style="font-family: 'pretendardgov', sans-serif;">
-    <h1 class='entry-title' style="font-family: 'pretendardgov', sans-serif;">
+  <div id='header'>
+    <h1 class='entry-title'>
       {% if entityData.custom_id %}
-        <span style='color:#4d4c4c; font-family: "pretendardgov", sans-serif;'>{{ entityData.custom_id }}</span>
+        <span style='color:#4d4c4c'>{{ entityData.custom_id }}</span>
       {% endif %}
-      <span style="font-family: 'pretendardgov', sans-serif;">{{ entityData.title }}</span>
+      {{ entityData.title }}
     </h1>
-    <div class="entry-meta" style="font-family: 'pretendardgov', sans-serif;">
-      <p style="font-family: 'pretendardgov', sans-serif;">
-        <strong style="font-family: 'pretendardgov', sans-serif;">{{ 'Date'|trans }}:</strong> <span style="font-family: 'pretendardgov', sans-serif;">{{ date }}</span><br>
+    <div class="entry-meta">
+      <p>
+        <strong>{{ 'Date'|trans }}:</strong> {{ date }}<br>
         {% if entityData.tags %}
           {% set tags = entityData.tags|split('|') %}
-          <strong style="font-family: 'pretendardgov', sans-serif;">{{ 'Tags'|trans }}:</strong>
+          <strong>{{ 'Tags'|trans }}:</strong>
           {% for tag in tags %}
-            <span class='tag' style="font-family: 'pretendardgov', sans-serif;">{{ tag }}</span>
+            <span class='tag'>{{ tag }}</span>
           {% endfor %}<br>
         {% endif %}
         {% if entityData.category_title %}
-          <strong style="font-family: 'pretendardgov', sans-serif;">{{ 'Category'|trans }}:</strong> <span style="font-family: 'pretendardgov', sans-serif;">{{ entityData.category_title }}</span><br>
+          <strong>{{ 'Category'|trans }}:</strong> {{ entityData.category_title }}<br>
         {% endif %}
         {% if entityData.status_title %}
-          <strong style="font-family: 'pretendardgov', sans-serif;">{{ 'Status'|trans }}:</strong> <span style="font-family: 'pretendardgov', sans-serif;">{{ entityData.status_title }}</span><br>
+          <strong>{{ 'Status'|trans }}:</strong> {{ entityData.status_title }}<br>
         {% endif %}
-        <strong style="font-family: 'pretendardgov', sans-serif;">{{ 'Created by'|trans }}:</strong> <span style="font-family: 'pretendardgov', sans-serif;">{{ entityData.fullname }}</span><br>
-        <strong style="color: #29aeb9; font-weight: bold; font-family: 'pretendardgov', sans-serif;">📝 Font:</strong> <span style="font-family: 'pretendardgov', sans-serif; font-weight: 500; color: #29aeb9;">Pretendard GOV 폰트 적용됨 ✓</span><br>
+        <strong>{{ 'Created by'|trans }}:</strong> {{ entityData.fullname }}<br>
       </p>
     </div>
   </div>
