@@ -3,8 +3,9 @@
   <head>
     <style>{{ css|raw }}</style>
     {{ useCjk ? '<style>td { font-family:sun-extA; }</style>' }}
+    <style>body { font-family: 'pretendardgov', sans-serif; }</style>
   </head>
-  <body {{ useCjk ? " style='font-family:sun-extA;'" }}>
+  <body {{ useCjk ? " style='font-family:sun-extA;'" : " style='font-family:pretendardgov,sans-serif;'" }}>
   <htmlpagefooter name='footer'>
     {% if pdfSig %}
       <div class='footer-block signatures'>

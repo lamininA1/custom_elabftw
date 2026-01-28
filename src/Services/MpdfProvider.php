@@ -45,24 +45,19 @@ final class MpdfProvider implements MpdfProviderInterface
         $fontData = $defaultFontConfig['fontdata'];
 
         $fontsPath = dirname(__DIR__, 2) . '/web/assets/fonts';
+        // Convert to absolute path for mPDF
+        $fontsPath = realpath($fontsPath) ?: $fontsPath;
         
         // Add Pretendard GOV font configuration
         // Font names in mPDF must be lowercase
         // Standard variants: R=Regular, B=Bold, I=Italic, BI=Bold Italic
-        // Additional weight variants can be used with numeric keys
+        // Note: mPDF only supports R, B, I, BI keys. Other weights are handled via CSS font-weight
+        // File names must match exactly (case-sensitive on some systems)
         $fontData['pretendardgov'] = array(
-            'R' => 'PretendardGOV-Regular.ttf',      // Regular (400)
-            'B' => 'PretendardGOV-Bold.ttf',        // Bold (700)
-            'I' => 'PretendardGOV-Regular.ttf',     // Italic (Regular as base)
-            'BI' => 'PretendardGOV-Bold.ttf',       // Bold Italic
-            // Additional weight variants
-            '100' => 'PretendardGOV-Thin.ttf',      // Thin
-            '200' => 'PretendardGOV-ExtraLight.ttf', // ExtraLight
-            '300' => 'PretendardGOV-Light.ttf',    // Light
-            '500' => 'PretendardGOV-Medium.ttf',   // Medium
-            '600' => 'PretendardGOV-SemiBold.ttf',  // SemiBold
-            '800' => 'PretendardGOV-ExtraBold.ttf', // ExtraBold
-            '900' => 'PretendardGOV-Black.ttf',    // Black
+            'R' => 'PretendardGOV-Regular.ttf',      // Regular (400) - default
+            'B' => 'PretendardGOV-Bold.ttf',         // Bold (700)
+            'I' => 'PretendardGOV-Regular.ttf',      // Italic (using Regular as base)
+            'BI' => 'PretendardGOV-Bold.ttf',        // Bold Italic
         );
 
         // create the pdf
