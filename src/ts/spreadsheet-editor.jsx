@@ -154,7 +154,7 @@ function SpreadsheetEditor() {
       type: 'icon',
       class: 'ml-2 fas fa-floppy-disk',
       tooltip: i18next.t('save-attachment'),
-      onclick: isSaving ? undefined : onSaveOrReplace,
+      onclick: onSaveOrReplace,
     });
 
     tb.items.push(fullscreenBtn, importBtn, exportBtn, clearBtn );
