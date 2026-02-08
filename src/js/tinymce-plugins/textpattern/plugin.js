@@ -65,9 +65,7 @@
 
     const inlinePatterns = settings.inline || [
       { delimiter: '**', format: 'bold' },
-      { delimiter: '__', format: 'bold' },
       { delimiter: '*', format: 'italic' },
-      { delimiter: '_', format: 'italic' },
       { delimiter: '`', format: 'code' }
     ];
 
