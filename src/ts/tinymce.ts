@@ -37,7 +37,6 @@ import 'tinymce/plugins/save';
 import 'tinymce/plugins/searchreplace';
 import 'tinymce/plugins/table';
 import 'tinymce/plugins/template';
-// import 'tinymce/plugins/textpattern';
 import 'tinymce/plugins/visualblocks';
 import 'tinymce/plugins/visualchars';
 import '../js/tinymce-langs/ca_ES.js';
@@ -64,6 +63,7 @@ import '../js/tinymce-langs/sl_SI.js';
 import '../js/tinymce-langs/uz_UZ.js';
 import '../js/tinymce-langs/zh_CN.js';
 import '../js/tinymce-plugins/mention/plugin.js';
+import '../js/tinymce-plugins/textpattern/plugin.js';
 import { EntityType, Model } from './interfaces';
 import { reloadElements, escapeExtendedQuery, updateEntityBody, getNewIdFromPostRequest } from './misc';
 import { ApiC } from './api';
@@ -94,6 +94,127 @@ function getDatetime(): string {
 // ctrl-shift-D will add the date in the tinymce editor
 function addDatetimeOnCursor(): void {
   tinymce.activeEditor.execCommand('mceInsertContent', false, `${getDatetime()} `);
+}
+
+/**
+ * Get character offset of (node, offset) within container (walking text nodes in order).
+ */
+function getOffsetInContainer(container: Node, targetNode: Node, targetOffset: number): number {
+  let offset = 0;
+  const walk = (n: Node): boolean => {
+    if (n === targetNode) {
+      offset += targetOffset;
+      return true;
+    }
+    if (n.nodeType === Node.TEXT_NODE) {
+      offset += (n.textContent || '').length;
+      return false;
+    }
+    for (let i = 0; i < n.childNodes.length; i++) {
+      if (walk(n.childNodes[i])) return true;
+    }
+    return false;
+  };
+  walk(container);
+  return offset;
+}
+
+/**
+ * Get plain text of container (all text nodes in order).
+ */
+function getTextOfNode(container: Node): string {
+  if (container.nodeType === Node.TEXT_NODE) return container.textContent || '';
+  let s = '';
+  container.childNodes.forEach((n) => { s += getTextOfNode(n); });
+  return s;
+}
+
+/**
+ * MathJax: $ = inline, $$ = display. When mixed, interpret in order:
+ * - $$ first $ can close preceding inline; second $ opens display.
+ * - Closing $$ first $ closes display; second $ can open inline.
+ * So "$ A $$ B $$ C $" → segments " A ", " B ", " C " (inline, display, inline).
+ * Return the segment whose content strictly contains pos; otherwise null.
+ * Also returns start/end (character offsets in text) for positioning the popup over the segment.
+ */
+function getFormulaAtCursor(text: string, pos: number): { formula: string; display: 'inline' | 'block'; start: number; end: number } | null {
+  type Segment = { type: 'inline' | 'block'; start: number; end: number };
+  const segments: Segment[] = [];
+  let state: 'text' | 'inline' | 'display' = 'text';
+  let inlineOpen = 0;
+  let displayOpen = 0;
+  let i = 0;
+
+  while (i < text.length) {
+    // Only \ followed by $ is escape: that $ is not a delimiter. \mu, \alpha etc. are unchanged.
+    if (text[i] === '\\' && i + 1 < text.length && text[i + 1] === '$') {
+      i += 2;
+      continue;
+    }
+    if (text[i] === '$' && i + 1 < text.length && text[i + 1] === '$') {
+      if (state === 'inline') {
+        segments.push({ type: 'inline', start: inlineOpen + 1, end: i });
+        displayOpen = i;
+        state = 'display';
+      } else if (state === 'text') {
+        displayOpen = i;
+        state = 'display';
+      } else {
+        segments.push({ type: 'block', start: displayOpen + 2, end: i });
+        state = 'text';
+      }
+      i += 2;
+      continue;
+    }
+    if (text[i] === '$') {
+      if (state === 'inline') {
+        segments.push({ type: 'inline', start: inlineOpen + 1, end: i });
+        state = 'text';
+      } else if (state === 'text') {
+        inlineOpen = i;
+        state = 'inline';
+      } else {
+        segments.push({ type: 'block', start: displayOpen + 2, end: i });
+        state = 'text';
+      }
+      i += 1;
+      continue;
+    }
+    i += 1;
+  }
+
+  for (const seg of segments) {
+    if (pos >= seg.start && pos <= seg.end) {
+      const inner = text.slice(seg.start, seg.end);
+      return { formula: inner, display: seg.type === 'block' ? 'block' : 'inline', start: seg.start, end: seg.end };
+    }
+  }
+  return null;
+}
+
+/**
+ * Get (node, offset) for the position that corresponds to charOffset in container's text order.
+ */
+function getNodeAndOffset(container: Node, charOffset: number): { node: Node; offset: number } | null {
+  let current = 0;
+  const find = (n: Node): boolean => {
+    if (n.nodeType === Node.TEXT_NODE) {
+      const len = (n.textContent || '').length;
+      if (charOffset >= current && charOffset <= current + len) {
+        result = { node: n, offset: charOffset - current };
+        return true;
+      }
+      current += len;
+      return false;
+    }
+    for (let i = 0; i < n.childNodes.length; i++) {
+      if (find(n.childNodes[i])) return true;
+    }
+    return false;
+  };
+  let result: { node: Node; offset: number } | null = null;
+  find(container);
+  return result;
 }
 
 function isOverCharLimit(): boolean {
@@ -364,10 +485,10 @@ tinymce.PluginManager.add('table-column-width', (ed) => {
               name: 'width',
               label: '너비 (예: 100px, 20%, auto)',
               placeholder: '100px 또는 20%',
-              value: currentWidth,
             },
           ],
         },
+        initialData: { width: currentWidth },
         buttons: [
           {
             type: 'cancel',
@@ -459,9 +580,7 @@ export function getTinymceBaseConfig(page: string): object {
     convert_unsafe_embeds: true,
     // markdown-like text patterns for quick formatting
     text_patterns: [
-      { start: '*', end: '*', format: 'italic' },
-      { start: '**', end: '**', format: 'bold' },
-      { start: '`', end: '`', format: 'code' },
+
       { start: '- ', cmd: 'InsertUnorderedList' },
       { start: '1. ', cmd: 'InsertOrderedList' },
       { start: '## ', format: 'h2' },
@@ -601,6 +720,123 @@ export function getTinymceBaseConfig(page: string): object {
         // this will trigger the images_upload_handler event hook defined further above
         editor.uploadImages();
       });
+
+      // Math preview popup: when cursor is inside $ ... $ or $$ ... $$, show live preview above
+      const mathPreviewPopup = document.createElement('div');
+      mathPreviewPopup.className = 'elabftw-math-preview-popup';
+      mathPreviewPopup.setAttribute('aria-hidden', 'true');
+      Object.assign(mathPreviewPopup.style, {
+        position: 'fixed',
+        zIndex: '10000',
+        padding: '8px 12px',
+        background: 'var(--bs-body-bg, #fff)',
+        border: '1px solid var(--bs-border-color, #dee2e6)',
+        borderRadius: '6px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+        fontSize: '1rem',
+        maxWidth: '90vw',
+        display: 'none',
+        pointerEvents: 'none',
+      });
+      const mathPreviewContent = document.createElement('div');
+      mathPreviewContent.className = 'elabftw-math-preview-content';
+      mathPreviewPopup.appendChild(mathPreviewContent);
+      document.body.appendChild(mathPreviewPopup);
+
+      let mathPreviewTimer: ReturnType<typeof setTimeout> | null = null;
+      const MATH_PREVIEW_DEBOUNCE_MS = 200;
+      const runMathPreview = (): void => {
+        const body = editor.getBody();
+        const rng = editor.selection.getRng();
+        if (!body || !rng) {
+          mathPreviewPopup.style.display = 'none';
+          return;
+        }
+        const selNode = editor.selection.getNode();
+        const block = (selNode instanceof Element ? selNode.closest('p, div, li, td, th') : null) ?? body;
+        const blockText = getTextOfNode(block);
+        if (blockText.indexOf('$') === -1) {
+          mathPreviewPopup.style.display = 'none';
+          return;
+        }
+        const cursorOffset = getOffsetInContainer(block, rng.startContainer, rng.startOffset);
+        const at = getFormulaAtCursor(blockText, cursorOffset);
+        if (!at) {
+          mathPreviewPopup.style.display = 'none';
+          return;
+        }
+        const wrapper = '\\(' + at.formula + '\\)';
+        mathPreviewContent.innerHTML = wrapper;
+        mathPreviewPopup.style.display = 'block';
+        MathJax.typesetPromise([mathPreviewContent]).then(() => {
+          try {
+            const body = editor.getBody();
+            if (!body || !body.contains(block)) {
+              mathPreviewPopup.style.display = 'none';
+              return;
+            }
+            const iframe = editor.getContainer().querySelector('iframe');
+            const baseRect = iframe ? iframe.getBoundingClientRect() : { top: 0, left: 0, width: 0, height: 0 };
+            const openStart = at.display === 'block' ? Math.max(0, at.start - 2) : Math.max(0, at.start - 1);
+            const openEnd = at.start;
+            const openStartPos = getNodeAndOffset(block, openStart);
+            const openEndPos = getNodeAndOffset(block, openEnd);
+            let openRect: DOMRect;
+            if (openStartPos && openEndPos) {
+              const openRng = editor.dom.createRng();
+              openRng.setStart(openStartPos.node, openStartPos.offset);
+              openRng.setEnd(openEndPos.node, openEndPos.offset);
+              openRect = openRng.getBoundingClientRect();
+            } else {
+              openRect = rng.getBoundingClientRect();
+            }
+            // --- Popup position: same rules for $ $ and $$ $$ (gap, popupTop, minTop, etc.); anchor = opening $ or $$ ---
+            const gap = 24;
+            const minTop = 8;
+            const minLeft = 8;
+            const minRight = 8;
+            const vw = document.documentElement.clientWidth;
+            const popupW = mathPreviewPopup.offsetWidth;
+            const openRightX = baseRect.left + openRect.left + openRect.width;
+            const popupTop = baseRect.top + openRect.top - mathPreviewPopup.offsetHeight - gap;
+            const popupLeftRaw = openRightX - popupW;
+            const popupLeft = Math.max(minLeft, Math.min(popupLeftRaw, vw - popupW - minRight));
+            mathPreviewPopup.style.top = `${Math.max(minTop, popupTop)}px`;
+            mathPreviewPopup.style.left = `${popupLeft}px`;
+          } catch {
+            mathPreviewPopup.style.display = 'none';
+          }
+        }).catch(() => {
+          mathPreviewPopup.style.display = 'none';
+        });
+      };
+      const updateMathPreview = (): void => {
+        if (mathPreviewTimer) clearTimeout(mathPreviewTimer);
+        mathPreviewTimer = setTimeout(() => {
+          mathPreviewTimer = null;
+          runMathPreview();
+        }, MATH_PREVIEW_DEBOUNCE_MS);
+      };
+      editor.on('KeyUp', updateMathPreview);
+      editor.on('SelectionChange', updateMathPreview);
+      editor.on('blur', () => { mathPreviewPopup.style.display = 'none'; });
+
+      const hidePopupOnScroll = (): void => { mathPreviewPopup.style.display = 'none'; };
+      window.addEventListener('scroll', hidePopupOnScroll, true);
+      editor.on('init', () => {
+        const iframe = editor.getContainer().querySelector('iframe');
+        if (iframe && iframe.contentWindow) {
+          iframe.contentWindow.addEventListener('scroll', hidePopupOnScroll);
+        }
+      });
+      editor.on('remove', () => {
+        window.removeEventListener('scroll', hidePopupOnScroll, true);
+        const iframe = editor.getContainer().querySelector('iframe');
+        if (iframe && iframe.contentWindow) {
+          iframe.contentWindow.removeEventListener('scroll', hidePopupOnScroll);
+        }
+      });
+
       // Hook into the SelectionChange event - This is to make sure we reset our control variable correctly
       editor.on('SelectionChange', () => {
         // Check if the user has selected an image
