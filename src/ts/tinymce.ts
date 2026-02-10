@@ -258,28 +258,34 @@ const imagesUploadHandler = (blobInfo: TinyMCEBlobInfo) => new Promise((resolve,
   const dropzoneEl = document.getElementById('elabftw-dropzone') as any;
   const dropZone = dropzoneEl.dropzone;
 
-  const uploadWithHook = (file: File) => {
-    const successHandler = (f: any, response: any) => {
-    const isSameFile = (f.size === file.size && f.type === file.type);
+  const uploadWithHook = (file: DropzoneFile) => {
+    const successHandler = (f: DropzoneFile) => {
+      // Using size and type as a fallback to match Files with Blobs, as they lack a common unique identifier.
+      // This logic prevents files from being incorrectly overwritten when multiple files are dropped at once.
+      if ( f.size !== file.size || f.type !== file.type) {
+        return;
+      }
+      dropZone.off('success', successHandler);
 
-    if (isSameFile) {
-      dropZone.off('success', successHandler); // linstener cleanup
-
-      const newId = response.id;
-      ApiC.getJson(`${entity.type}/${entity.id}/${Model.Upload}/${newId}`)
-        .then((json: any) => {
-          reloadElements(['uploadsDiv']).then(() => {
-          resolve(`app/download.php?f=${json.long_name}&name=${f.name}&storage=${json.storage}`);
+      const locationHeader = f.xhr ? f.xhr.getResponseHeader('Location') : null;
+      if (!locationHeader || !locationHeader.includes('/v2/')) {
+        dropZone.off('success', successHandler);
+        reject('Missing or malformed Location header');
+        return;
+      }
+      const locationHeader_parts = locationHeader.split('/v2/');
+      ApiC.getJson(`${locationHeader_parts[1]}`)
+        .then((json: { long_name: string, real_name: string, storage: string | number }) => {
+          return reloadElements(['uploadsDiv']).then(() => {
+            return `app/download.php?f=${json.long_name}&name=${json.real_name}&storage=${json.storage}`;
           });
         })
+        .then((url: string) => resolve(url))
         .catch(() => reject('Metadata fetch failed'));
-    } else {
-      reject('Uploaded file does not match the original file');}
-  };
+    };
     dropZone.on('success', successHandler);
     dropZone.addFile(blobInfo.blob());
   };
-  
   // Edgecase for editing an image using tinymce ImageTools
   // Check if it was selected. This is set by an event hook below
   if (tinymceEditImage.selected === true) {
@@ -553,6 +559,8 @@ export function getTinymceBaseConfig(page: string): object {
     removedMenuItems = 'newdocument, anchor';
   }
 
+  const isDark = document.documentElement.classList.contains('dark-mode');
+
   return {
     selector: '.mceditable',
     table_default_styles: {
@@ -562,8 +570,9 @@ export function getTinymceBaseConfig(page: string): object {
     table_column_resizing: 'resizetable',
     browser_spellcheck: true,
     // location of the skin directory
-    skin_url: '/assets/tinymce_skins',
-    content_css: '/assets/tinymce_content.min.css',
+    skin_url: isDark ? '/assets/tinymce_skins_dark' : '/assets/tinymce_skins',
+    skin: isDark ? 'oxide-dark' : 'oxide',
+    content_css: isDark ? ['/assets/tinymce_skins/content/dark/content.min.css', '/assets/tinymce_content.min.css'] : ['/assets/tinymce_content.min.css'],
     emoticons_database_url: 'assets/tinymce_emojis.js',
     // remove the "Upgrade" button
     promotion: false,
@@ -918,7 +927,7 @@ export function getTinymceBaseConfig(page: string): object {
       }
 
       // sort down icon from COLLECTION: Dazzle Line Icons LICENSE: CC Attribution License AUTHOR: Dazzle UI
-      editor.ui.registry.addIcon('sort-amount-down-alt', '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 12h8m-8-4h8m-8 8h8M6 7v10m0 0-3-3m3 3 3-3" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'), // eslint-disable-line
+      editor.ui.registry.addIcon('sort-amount-down-alt', '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 12h8m-8-4h8m-8 8h8M6 7v10m0 0-3-3m3 3 3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'), // eslint-disable-line
       // add toggle button for table sorting
       editor.ui.registry.addToggleButton('sort-table', {
         icon: 'sort-amount-down-alt',
