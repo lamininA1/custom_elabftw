@@ -51,7 +51,6 @@ final class MpdfProvider implements MpdfProviderInterface
         // Verify font files exist before registering
         $regularFont = $fontsPath . '/PretendardGOV-Regular.ttf';
         $boldFont = $fontsPath . '/PretendardGOV-Bold.ttf';
-        $usePretendardGov = false;
         
         // Only register Pretendard GOV if font files exist
         if (file_exists($regularFont) && file_exists($boldFont) && is_readable($regularFont) && is_readable($boldFont)) {
@@ -93,6 +92,7 @@ final class MpdfProvider implements MpdfProviderInterface
         $mpdf->setAutoTopMargin = 'stretch';
         $mpdf->setAutoBottomMargin = 'stretch';
 
+        $mpdf->useSubstitutions = true;
         // set metadata
         $mpdf->SetAuthor($this->author);
 
